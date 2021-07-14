@@ -1,0 +1,168 @@
+Sub vba_homework()
+
+Dim i As Long
+'Declare variables:
+
+Dim summarrow As Long
+Dim totalvolume As Variant
+Dim openingprice As Variant
+Dim closeprice As Variant
+Dim yearlychange As Variant
+Dim percentchange As Variant
+Dim maxvolume As Variant
+Dim maxvolumeticker As String
+Dim maxperincrease As Variant
+Dim maxperticker As String
+Dim minperincrease As Variant
+Dim minperticker As String
+Dim stockticker As String
+Dim lastrow As Long
+
+Dim ws As Worksheet
+
+ 'Put summary headers on first sheet
+    Cells(2, 15).Value = "Greatest % Increase"
+    Cells(3, 15).Value = "Greatest % Decrease"
+    Cells(4, 15).Value = "Greatest Total Volume"
+    Cells(1, 16).Value = "Ticker"
+    Cells(1, 17).Value = "Value"
+    
+    
+For Each ws In Worksheets
+
+'Assign starting values
+
+    summarrow = 2
+    totalvolume = 0
+    openingprice = ws.Cells(2, 3).Value
+    closeprice = 0
+    yearlychange = 0
+    percentchange = 0
+    stockticker = ws.Cells(2, 1).Value
+
+    maxvolume = 0
+    maxvolumeticker = ""
+
+    maxperincrease = 0
+    maxperticker = ""
+
+    minperincrease = 999999999
+    minperticker = ""
+    ' Determine the Last Row
+    lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+
+    'Put headers on sheet
+    ws.Cells(1, 9).Value = "Ticker"
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    ws.Cells(1, 12).Value = "Total Stock Volume"
+    
+   
+
+    'Start loop for i from 2 to lastrow
+
+    'For i = 2 To lastrow
+    For i = 2 To lastrow
+
+
+        If ws.Cells(i, 1).Value <> ws.Cells(i + 1, 1).Value Then
+
+            ' Set the stockticker
+             stockticker = ws.Cells(i, 1).Value
+
+            ' Add to the totalvolume
+             totalvolume = totalvolume + ws.Cells(i, 7).Value
+            'Find the closeprice
+            closeprice = ws.Cells(i, 6).Value
+             'Calculate the yearlychange
+                yearlychange = Round((closeprice - openingprice), [2])
+                'Calculate the percentchange
+                If openingprice <> 0 Then
+                percentchange = Round((yearlychange / openingprice), [4])
+                Else
+                End If
+
+    
+
+            ' Print the stockticker in the Summary Table
+            ws.Range("I" & summarrow).Value = stockticker
+            
+                If percentchange > maxperincrease Then
+                maxperincrease = percentchange
+                maxperticker = stockticker
+                Else
+                End If
+                
+                  If percentchange < minperincrease Then
+                minperincrease = percentchange
+                minperticker = stockticker
+                Else
+                End If
+
+            ' Print the yearlychange to the Summary Table
+
+             ws.Range("J" & summarrow).Value = Round((closeprice - openingprice), [2])
+      
+      
+      
+             ' Print the percentchange to the Summary Table
+        
+              ws.Range("K" & summarrow).Value = Format((percentchange), "Percent")
+             If ws.Range("K" & summarrow).Value >= 0 Then
+                    ws.Range("K" & summarrow).Interior.ColorIndex = 4
+            
+                 Else: ws.Range("K" & summarrow).Interior.ColorIndex = 3
+            
+             End If
+            
+            
+          
+                
+
+             ' Print the totalvolume to the Summary Table
+     
+               ws.Range("L" & summarrow).Value = totalvolume
+               
+              
+                
+                    ' Add one to the summary table row
+                 summarrow = summarrow + 1
+      
+                 ' Reset the totalvolume
+                 totalvolume = 0
+      
+                 'set openingprice to next row value
+                  openingprice = ws.Cells(i + 1, 3)
+        
+       
+                ' If the cell immediately following a row is the same stockticker...
+                    Else
+
+                ' Add to the totalvolume
+                    totalvolume = totalvolume + ws.Cells(i, 7).Value
+                If totalvolume > maxvolume Then
+                maxvolume = totalvolume
+                maxvolumeticker = stockticker
+             Else
+                
+                End If
+    
+
+            End If
+
+
+
+        Next i
+
+Next ws
+
+'Put summary values on first worksheet
+    Cells(2, 17).Value = Format(maxperincrease, "Percent")
+    Cells(2, 16).Value = maxperticker
+    Cells(3, 17).Value = Format(minperincrease, "Percent")
+    Cells(3, 16).Value = minperticker
+    Cells(4, 17).Value = maxvolume
+    Cells(4, 16).Value = maxvolumeticker
+
+End Sub
